@@ -1,46 +1,168 @@
-/* ============================================================
-   styles.css — how your site looks.
-   Change the colours in :root first; the rest of the site uses them.
-   ============================================================ */
-
 :root {
-  --brand: #2f5bea;        /* main colour: buttons, links */
-  --brand-dark: #1f3fae;   /* hover colour */
-  --text: #1b1f27;
-  --muted: #5d6573;
-  --background: #f6f7fb;
-  --surface: #ffffff;      /* cards */
-  --border: #dde1ea;
-  --radius: 12px;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --green: #376d4b;
+  --green-deep: #234a35;
+  --green-soft: #e8f0e5;
+  --ink: #26342b;
+  --muted: #778078;
+  --paper: #f7f8f3;
+  --surface: #fffefa;
+  --line: #e4e8df;
+  --sun: #e5b85e;
+  --radius: 8px;
+  --sans: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
 }
 
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: var(--font);
-  color: var(--text);
-  background: var(--background);
-  line-height: 1.55;
+  font-family: var(--sans);
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image: radial-gradient(#dce5d8 0.65px, transparent 0.65px);
+  background-size: 15px 15px;
+  line-height: 1.5;
 }
 
-a { color: var(--brand); }
+a, button, input { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
 a:focus-visible, button:focus-visible, input:focus-visible {
-  outline: 3px solid var(--brand);
+  outline: 3px solid #8ab68f;
   outline-offset: 2px;
 }
 
-/* ---------- Header ---------- */
 .site-header {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 24px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  gap: 48px;
+  min-height: 72px;
+  padding: 0 max(28px, calc((100vw - 1120px) / 2));
+  background: rgba(255, 254, 250, 0.92);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; font-family: var(--serif); font-size: 1.4rem; font-weight: 700; color: var(--green-deep); }
+.brand-mark { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: var(--green); color: #fff; font: 1rem var(--sans); }
+nav { display: flex; align-items: center; gap: 30px; height: 72px; }
+nav a { position: relative; display: flex; align-items: center; height: 100%; color: #717a71; font-size: 0.87rem; text-decoration: none; }
+nav a[aria-current="page"] { color: var(--green-deep); font-weight: 700; }
+nav a[aria-current="page"]::after { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--green); content: ""; }
+.header-note { display: flex; align-items: center; gap: 9px; margin-left: auto; color: #798279; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #7eac75; box-shadow: 0 0 0 4px #e9f1e6; }
+
+main { max-width: 1120px; margin: 0 auto; padding: 49px 28px 76px; }
+.welcome { position: relative; display: flex; min-height: 220px; align-items: center; justify-content: space-between; overflow: hidden; padding: 0 43px; border-radius: 8px; background: #eaf0e4; }
+.welcome::after { position: absolute; top: -105px; right: 180px; width: 330px; height: 330px; border: 1px solid rgba(68, 109, 72, 0.11); border-radius: 50%; content: ""; }
+.eyebrow { margin: 0; color: #748274; font-size: 0.67rem; font-weight: 750; letter-spacing: 0.1em; }
+.welcome .eyebrow { color: var(--green); }
+h1, h2, h3, p { margin-top: 0; }
+.welcome h1 { margin: 11px 0 8px; font-family: var(--serif); font-size: 2.8rem; font-weight: 400; line-height: 1.02; letter-spacing: 0; }
+.welcome h1 em { color: var(--green); font-weight: 400; }
+.lead { max-width: 420px; margin-bottom: 0; color: #68756a; font-size: 0.94rem; }
+.welcome-mark { position: relative; z-index: 1; width: 180px; height: 170px; margin-right: 28px; }
+.sun-mark { position: absolute; top: 3px; right: 15px; color: var(--sun); font-size: 2rem; }
+.leaf-mark { position: absolute; display: block; color: #6b946d; font-size: 5.2rem; line-height: 1; transform-origin: bottom center; }
+.leaf-one { right: 46px; bottom: 31px; transform: rotate(-32deg); }
+.leaf-two { right: 73px; bottom: 24px; color: #487852; font-size: 4.7rem; transform: rotate(28deg) scaleX(-1); }
+.leaf-three { right: 15px; bottom: 36px; color: #90ad79; font-size: 4rem; transform: rotate(28deg); }
+.soil-mark { position: absolute; right: 12px; bottom: 25px; width: 110px; height: 12px; border-radius: 50%; background: #8c7657; }
+
+.dashboard-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; gap: 54px; margin-top: 46px; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.section-heading h2 { margin: 6px 0 0; font-family: var(--serif); font-size: 1.75rem; font-weight: 400; letter-spacing: 0; }
+.button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 8px; padding: 0 17px; border: 1px solid transparent; border-radius: 6px; font: 600 0.83rem var(--sans); text-decoration: none; cursor: pointer; transition: background 160ms ease, transform 160ms ease; }
+.button:hover { transform: translateY(-1px); }
+.button-primary { background: var(--green); color: #fff; }
+.button-primary:hover { background: var(--green-deep); }
+.button-primary span { font-size: 1.2rem; font-weight: 400; }
+.section-note { margin: 20px 0 9px; color: var(--muted); font-size: 0.8rem; }
+.plant-list { border-top: 1px solid var(--line); }
+.plant-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 15px; min-height: 86px; border-bottom: 1px solid var(--line); animation: arrive 300ms ease both; }
+.plant-avatar { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: #eaf0e6; font-size: 1.45rem; }
+.plant-info { min-width: 0; }
+.plant-info h3 { overflow: hidden; margin: 0 0 2px; font-size: 0.93rem; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.plant-detail { display: flex; flex-wrap: wrap; gap: 5px 9px; color: var(--muted); font-size: 0.74rem; }
+.plant-detail span + span::before { margin-right: 8px; color: #bac3b8; content: "·"; }
+.water-button { min-width: 104px; min-height: 36px; padding: 0 12px; border: 1px solid #cdd9c9; border-radius: 5px; background: transparent; color: var(--green); font: 650 0.75rem var(--sans); cursor: pointer; }
+.water-button:hover { border-color: var(--green); background: #f0f5ed; }
+.water-button.is-watered { border-color: transparent; background: var(--green-soft); color: var(--green); cursor: default; }
+.empty-state { padding: 40px 20px; text-align: center; }
+.empty-state[hidden] { display: none; }
+.empty-icon { font-size: 2rem; }
+.empty-state h3 { margin: 10px 0 4px; font-family: var(--serif); font-size: 1.35rem; font-weight: 400; }
+.empty-state p { max-width: 320px; margin: 0 auto 13px; color: var(--muted); font-size: 0.85rem; }
+.text-button { padding: 4px; border: 0; background: transparent; color: var(--green); font: 650 0.83rem var(--sans); cursor: pointer; }
+
+.side-column { display: grid; gap: 18px; }
+.reminder-panel { padding: 22px; border: 1px solid #dfe7db; border-radius: 7px; background: var(--surface); }
+.panel-topline { display: flex; align-items: center; gap: 9px; }
+.reminder-icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 50%; background: var(--green-soft); color: var(--green); font-size: 1.15rem; }
+.reminder-panel h2, .tip-panel h2 { margin: 16px 0 7px; font-family: var(--serif); font-size: 1.45rem; font-weight: 400; line-height: 1.15; }
+.panel-copy, .tip-panel > p:last-child { margin-bottom: 18px; color: var(--muted); font-size: 0.81rem; }
+.time-label { display: block; margin-bottom: 6px; color: #626d63; font-size: 0.76rem; font-weight: 650; }
+.time-input { width: 100%; height: 41px; padding: 0 11px; border: 1px solid #dce3d8; border-radius: 5px; background: #fff; color: var(--ink); font: 0.9rem var(--sans); }
+.button-reminder { width: 100%; margin-top: 11px; background: #e9f0e5; color: var(--green-deep); }
+.button-reminder:hover { background: #dce9d7; }
+.button-reminder.is-enabled { background: var(--green); color: #fff; }
+.reminder-status { margin: 11px 0 0; color: var(--muted); font-size: 0.72rem; line-height: 1.45; }
+.tip-panel { position: relative; overflow: hidden; padding: 20px 22px; border-radius: 7px; background: #f5ebd7; }
+.tip-spark { position: absolute; top: 10px; right: 15px; color: #c59c48; font-size: 1.45rem; }
+.tip-panel .eyebrow { color: #8d7545; }
+.tip-panel h2 { margin-top: 13px; }
+.tip-panel > p:last-child { margin: 0; color: #766b55; }
+
+.site-footer { padding: 20px 24px 26px; border-top: 1px solid var(--line); color: #828a81; text-align: center; font-size: 0.72rem; }
+.site-footer p { margin: 0; }
+.site-footer span { padding: 0 4px; color: #b0b9ad; }
+
+.plant-dialog { width: min(440px, calc(100% - 32px)); padding: 26px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: 0 18px 70px rgba(32, 54, 35, 0.2); }
+.plant-dialog::backdrop { background: rgba(29, 45, 33, 0.4); backdrop-filter: blur(2px); }
+.dialog-heading { display: flex; align-items: start; justify-content: space-between; margin-bottom: 20px; }
+.dialog-heading h2 { margin: 5px 0 0; font-family: var(--serif); font-size: 1.8rem; font-weight: 400; }
+.icon-button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: #f0f2ed; color: var(--ink); font-size: 1.35rem; cursor: pointer; }
+.plant-dialog label { display: block; margin: 13px 0 6px; color: #59645a; font-size: 0.78rem; font-weight: 650; }
+.plant-dialog label span { color: #ad624e; }
+.plant-dialog input { width: 100%; height: 42px; padding: 0 11px; border: 1px solid #dce3d8; border-radius: 5px; background: #fff; color: var(--ink); font: 0.88rem var(--sans); }
+.dialog-actions { display: flex; justify-content: end; gap: 9px; margin-top: 24px; }
+.button-quiet { border-color: var(--line); background: transparent; color: #5f695f; }
+.button-quiet:hover { background: #f5f6f1; }
+
+@keyframes arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 760px) {
+  .site-header { gap: 22px; padding: 0 20px; }
+  nav { gap: 19px; }
+  .header-note { display: none; }
+  main { padding: 30px 20px 52px; }
+  .welcome { min-height: 205px; padding: 26px; }
+  .welcome-mark { margin-right: -6px; transform: scale(0.82); transform-origin: center right; }
+  .welcome h1 { font-size: 2.45rem; }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; margin-top: 34px; }
+  .side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+}
+
+@media (max-width: 520px) {
+  .site-header { min-height: 62px; justify-content: space-between; gap: 10px; padding: 0 15px; }
+  .brand { gap: 7px; font-size: 1.22rem; }
+  .brand-mark { width: 26px; height: 26px; }
+  nav { height: 62px; gap: 13px; }
+  nav a { font-size: 0.76rem; }
+  main { padding: 20px 15px 40px; }
+  .welcome { min-height: 185px; padding: 22px 20px; }
+  .welcome h1 { font-size: 2rem; }
+  .lead { max-width: 250px; font-size: 0.82rem; }
+  .welcome-mark { position: absolute; right: 1px; bottom: 2px; width: 130px; height: 138px; margin: 0; opacity: 0.85; transform: scale(0.72); transform-origin: bottom right; }
+  .welcome::after { right: -170px; }
+  .section-heading { align-items: center; }
+  .section-heading h2 { font-size: 1.5rem; }
+  .button-primary { min-height: 38px; padding: 0 11px; font-size: 0.75rem; }
+  .plant-row { grid-template-columns: 43px minmax(0, 1fr) auto; gap: 10px; min-height: 78px; }
+  .plant-avatar { width: 40px; height: 40px; font-size: 1.2rem; }
+  .plant-info h3 { font-size: 0.83rem; }
+  .plant-detail { font-size: 0.67rem; }
+  .water-button { min-width: 83px; min-height: 33px; padding: 0 8px; font-size: 0.69rem; }
+  .side-column { grid-template-columns: minmax(0, 1fr); }
 }
 .brand {
   font-weight: 700;

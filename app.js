@@ -1,141 +1,233 @@
-// ============================================================
-// app.js — what your site DOES.
-// Plain JavaScript, no libraries, no installs.
-// It uses STARTUP and LISTINGS from data.js (loaded first).
-// ============================================================
-
 (function () {
   "use strict";
 
-  // ----------------------------------------------------------
-  // 1. Saving things in the browser (localStorage).
-  //    This only remembers things on THIS browser on THIS device.
-  //    Your teammates and your customers will NOT see it.
-  //    A real product would need a server and a database for that.
-  // ----------------------------------------------------------
   const storage = {
     get: function (key, fallback) {
       try {
         const saved = localStorage.getItem(key);
         return saved === null ? fallback : JSON.parse(saved);
       } catch (error) {
-        return fallback; // storage blocked or broken: just carry on
+        return fallback;
       }
     },
     set: function (key, value) {
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (error) {
-        // storage blocked (e.g. private window): ignore
+        // Keep the app usable when browser storage is unavailable.
       }
     }
   };
 
-  let savedIds = storage.get("savedIds", []);
+  const todayKey = function () {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return now.getFullYear() + "-" + month + "-" + day;
+  };
 
-  // ----------------------------------------------------------
-  // 2. Put the startup's name and pitch on the page.
-  // ----------------------------------------------------------
-  document.title = STARTUP.name;
-  document.getElementById("brand-name").textContent = STARTUP.name;
-  document.getElementById("tagline").textContent = STARTUP.tagline;
-  document.getElementById("pitch").textContent = STARTUP.pitch;
+  const plants = storage.get("littleLeafPlants", PLANTS.map(function (plant) {
+    return Object.assign({}, plant, { wateredOn: "" });
+  }));
+  const reminder = storage.get("littleLeafReminder", { time: "09:00", enabled: false });
+  const plantList = document.getElementById("plant-list");
+  const summary = document.getElementById("routine-summary");
+  const emptyState = document.getElementById("empty-state");
+  const reminderTime = document.getElementById("reminder-time");
+  const reminderButton = document.getElementById("notification-toggle");
+  const reminderStatus = document.getElementById("reminder-status");
+  const dialog = document.getElementById("plant-dialog");
+  const form = document.getElementById("plant-form");
 
-  // ----------------------------------------------------------
-  // 3. Views: show one section at a time, based on the #link in the address bar.
-  // ----------------------------------------------------------
-  function showView() {
-    const requested = (window.location.hash || "#home").slice(1);
-    const views = document.querySelectorAll("[data-view]");
-    const exists = Array.prototype.some.call(views, function (view) {
-      return view.id === requested;
-    });
-    const current = exists ? requested : "home";
+  function savePlants() {
+    storage.set("littleLeafPlants", plants);
+  }
 
-    views.forEach(function (view) {
-      view.hidden = view.id !== current;
-    });
+  function renderPlants() {
+    const wateredCount = plants.filter(function (plant) {
+      return plant.wateredOn === todayKey();
+    }).length;
+    const remaining = plants.length - wateredCount;
 
-    document.querySelectorAll("nav a").forEach(function (link) {
-      if (link.getAttribute("href") === "#" + current) {
-        link.setAttribute("aria-current", "page");
-      } else {
-        link.removeAttribute("aria-current");
+    summary.textContent = plants.length === 0
+      ? "Your daily routine is ready when you are."
+      : remaining === 0
+        ? "All " + plants.length + " plants are watered. Lovely work."
+        : remaining + " plant" + (remaining === 1 ? "" : "s") + " waiting for a drink today";
+
+    emptyState.hidden = plants.length !== 0;
+    plantList.replaceChildren();
+
+    plants.forEach(function (plant, index) {
+      const isWatered = plant.wateredOn === todayKey();
+      const row = document.createElement("article");
+      row.className = "plant-row";
+      row.style.animationDelay = Math.min(index * 45, 180) + "ms";
+
+      const avatar = document.createElement("span");
+      avatar.className = "plant-avatar";
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = plant.icon || "🪴";
+
+      const info = document.createElement("div");
+      info.className = "plant-info";
+      const name = document.createElement("h3");
+      name.textContent = plant.name;
+      const detail = document.createElement("div");
+      detail.className = "plant-detail";
+      if (plant.species) {
+        const species = document.createElement("span");
+        species.textContent = plant.species;
+        detail.append(species);
       }
-    });
+      if (plant.location) {
+        const location = document.createElement("span");
+        location.textContent = plant.location;
+        detail.append(location);
+      }
+      info.append(name, detail);
 
-    window.scrollTo(0, 0);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "water-button" + (isWatered ? " is-watered" : "");
+      button.textContent = isWatered ? "✓ Watered" : "Mark watered";
+      button.setAttribute("aria-label", isWatered ? plant.name + " watered today" : "Mark " + plant.name + " as watered");
+      button.disabled = isWatered;
+      button.addEventListener("click", function () {
+        plant.wateredOn = todayKey();
+        savePlants();
+        renderPlants();
+      });
+
+      row.append(avatar, info, button);
+      plantList.append(row);
+    });
   }
 
-  window.addEventListener("hashchange", showView);
-
-  // ----------------------------------------------------------
-  // 4. Explore page: build one card per listing.
-  //    We use textContent (not innerHTML) so text is always shown
-  //    as text — a basic security habit.
-  // ----------------------------------------------------------
-  const grid = document.getElementById("listing-grid");
-  const searchBox = document.getElementById("search-box");
-  const emptyMessage = document.getElementById("empty-message");
-  const savedCount = document.getElementById("saved-count");
-
-  function makeCard(item) {
-    const card = document.createElement("article");
-    card.className = "card";
-
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = item.category;
-
-    const title = document.createElement("h2");
-    title.textContent = item.name;
-
-    const text = document.createElement("p");
-    text.textContent = item.description;
-
-    const isSaved = savedIds.indexOf(item.id) !== -1;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "button secondary";
-    button.textContent = isSaved ? "Saved ✓" : "Save";
-    button.setAttribute("aria-pressed", isSaved ? "true" : "false");
-    button.addEventListener("click", function () {
-      toggleSaved(item.id);
-    });
-
-    card.append(tag, title, text, button);
-    return card;
+  function saveReminder() {
+    reminder.time = reminderTime.value || "09:00";
+    storage.set("littleLeafReminder", reminder);
   }
 
-  function toggleSaved(id) {
-    if (savedIds.indexOf(id) === -1) {
-      savedIds.push(id);
+  function updateReminderControls() {
+    reminderButton.textContent = reminder.enabled ? "Turn off notifications" : "Turn on notifications";
+    reminderButton.classList.toggle("is-enabled", reminder.enabled);
+    reminderButton.setAttribute("aria-pressed", String(reminder.enabled));
+    if (reminder.enabled) {
+      reminderStatus.textContent = "Daily browser reminders are on for " + formatTime(reminder.time) + ". Keep Little Leaf open to receive them.";
     } else {
-      savedIds = savedIds.filter(function (savedId) { return savedId !== id; });
+      reminderStatus.textContent = "Your daily plant list is ready whenever you are.";
     }
-    storage.set("savedIds", savedIds);
-    renderListings();
   }
 
-  function renderListings() {
-    const query = searchBox.value.trim().toLowerCase();
-    const matches = LISTINGS.filter(function (item) {
-      const text = (item.name + " " + item.category + " " + item.description).toLowerCase();
-      return text.indexOf(query) !== -1;
+  function formatTime(value) {
+    const parts = value.split(":");
+    const date = new Date();
+    date.setHours(Number(parts[0]), Number(parts[1]), 0, 0);
+    return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+
+  function checkReminder() {
+    if (!reminder.enabled || !("Notification" in window) || Notification.permission !== "granted") {
+      return;
+    }
+
+    const currentTime = new Date();
+    const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+    const reminderParts = reminder.time.split(":");
+    const reminderMinutes = Number(reminderParts[0]) * 60 + Number(reminderParts[1]);
+    const duePlants = plants.filter(function (plant) { return plant.wateredOn !== todayKey(); });
+    const sentKey = "littleLeafReminderSent";
+
+    if (currentMinutes < reminderMinutes || duePlants.length === 0 || storage.get(sentKey, "") === todayKey()) {
+      return;
+    }
+
+    const notification = new Notification("A little water, a lot of love", {
+      body: duePlants.length + " plant" + (duePlants.length === 1 ? " is" : "s are") + " waiting for you today.",
+      tag: "little-leaf-daily-reminder"
     });
-
-    grid.replaceChildren.apply(grid, matches.map(makeCard));
-    emptyMessage.hidden = matches.length > 0;
-    savedCount.textContent = savedIds.length === 0
-      ? "Tap Save on anything you like."
-      : "You've saved " + savedIds.length + " item(s) on this device.";
+    notification.onclick = function () {
+      window.focus();
+      notification.close();
+    };
+    storage.set(sentKey, todayKey());
   }
 
-  searchBox.addEventListener("input", renderListings);
+  document.getElementById("today-date").textContent = new Date().toLocaleDateString([], {
+    weekday: "long", month: "long", day: "numeric"
+  }).toUpperCase();
 
-  // ----------------------------------------------------------
-  // 5. Start up.
-  // ----------------------------------------------------------
-  renderListings();
-  showView();
+  reminderTime.value = reminder.time || "09:00";
+  reminderTime.addEventListener("change", function () {
+    saveReminder();
+    updateReminderControls();
+  });
+
+  reminderButton.addEventListener("click", async function () {
+    if (reminder.enabled) {
+      reminder.enabled = false;
+      saveReminder();
+      updateReminderControls();
+      return;
+    }
+
+    if (!("Notification" in window)) {
+      reminderStatus.textContent = "This browser does not support notifications. Your daily plant list is still here.";
+      return;
+    }
+
+    const permission = Notification.permission === "default"
+      ? await Notification.requestPermission()
+      : Notification.permission;
+
+    if (permission !== "granted") {
+      reminderStatus.textContent = "Notifications are blocked. You can allow them in your browser settings.";
+      return;
+    }
+
+    reminder.enabled = true;
+    saveReminder();
+    updateReminderControls();
+    checkReminder();
+  });
+
+  document.getElementById("add-plant-open").addEventListener("click", function () {
+    dialog.showModal();
+    document.getElementById("plant-name").focus();
+  });
+  document.getElementById("add-first-plant").addEventListener("click", function () {
+    dialog.showModal();
+    document.getElementById("plant-name").focus();
+  });
+  document.getElementById("dialog-close").addEventListener("click", function () { dialog.close(); });
+  document.getElementById("dialog-cancel").addEventListener("click", function () { dialog.close(); });
+  dialog.addEventListener("click", function (event) {
+    if (event.target === dialog) {
+      dialog.close();
+    }
+  });
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const values = new FormData(form);
+    const icons = ["🪴", "🌿", "🍃", "🌱", "🌵"];
+    plants.push({
+      id: "plant-" + Date.now(),
+      name: values.get("name").trim(),
+      species: values.get("species").trim(),
+      location: values.get("location").trim(),
+      icon: icons[plants.length % icons.length],
+      wateredOn: ""
+    });
+    savePlants();
+    renderPlants();
+    form.reset();
+    dialog.close();
+  });
+
+  renderPlants();
+  updateReminderControls();
+  checkReminder();
+  window.setInterval(checkReminder, 30000);
 })();
